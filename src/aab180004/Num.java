@@ -18,26 +18,75 @@ public class Num  implements Comparable<Num> {
     int len;  // actual number of elements of array that are used;  number is stored in arr[0..len-1]
 
     public Num(String s) {
-        int arrSize = s.length();
-        arr = new long[arrSize];
-        for(int i=0;i<arrSize;i++){
-            arr[i] = Character.getNumericValue(s.charAt(arrSize-i-1));
+        len = s.length();
+        int i=0,j;
+        if(s.charAt(0) == '-'){
+            isNegative = true;
+            i++;
+            len--;
         }
+        else{
+            isNegative = false;
+        }
+        arr = new long[len];
+        for(j=len-1;j>=0;j--,i++){
+            arr[j] = Character.getNumericValue(s.charAt(i));
+        }
+    }
+    public Num(){
+        len = 0;
+        arr = new long[100000];
     }
 
     public Num(long x) {
+        this();
+        int i = 0;
+        if(x==0){
+            arr[i] = 0;
+            i++;
+        }
+        if(x<0){
+            isNegative = true;
+            x *=-1;
+        }
+        while(x>0)
+        {
+            isNegative = false;
+            arr[i] = x % base;
+            x = x / base;
+            i++;
+        }
+        len = i;
     }
 
     public static Num add(Num a, Num b) {
+        Num out = new Num();
+        long sum =0;
+        long carry =0;
+        int i=0;
+        while(i<a.len && i<b.len)
+        {
+            sum = a.arr[i] + b.arr[i] + carry;
+            out.arr[i] =sum % a.base;
+            carry = sum /a.base;
+            i++;
+        }
+        while(i<a.len)
+        {
+            sum = a.arr[i] + carry;
+            out.arr[i] = sum % a.base;
+            i++;
+        }
+        while(i<b.len)
+        {
+            sum = b.arr[i] + carry;
+            out.arr[i] = sum % b.base;
+            i++;
+        }
+        if(carry>0)
+            out.arr[i] = carry;
 
-
-        return null;
-    }
-    private void changeBase(){
-//        int arrSize = 0;
-//        arrSize = (int) Math.ceil((s.length()+1)/Math.log10(base)+1);
-//        arr = new long[arrSize];
-
+        return out;
     }
 
     public static Num subtract(Num a, Num b) {
@@ -79,10 +128,14 @@ public class Num  implements Comparable<Num> {
     // For example, if base=100, and the number stored corresponds to 10965,
     // then the output is "100: 65 9 1"
     public void printList() {
-        System.out.print(base+":");
-        for(long l :arr){
-            System.out.print(" "+l);
+        StringBuilder output = new StringBuilder();
+        output.append(base+":");
+        if(isNegative)
+            output.append(" -");
+        for(int i =0; i<len; i++){
+            output.append(" "+arr[i]);
         }
+        System.out.print(output);
     }
 
     // Return number to a string in base 10
@@ -94,6 +147,10 @@ public class Num  implements Comparable<Num> {
 
     // Return number equal to "this" number, in base=newBase
     public Num convertBase(int newBase) {
+        int arrSize = 0;
+        Num newNum = new Num("");
+        arrSize = (int) Math.ceil((len+1)/Math.log10(base)+1);
+        newNum.arr = new long[arrSize];
         return null;
     }
 
@@ -118,13 +175,15 @@ public class Num  implements Comparable<Num> {
 
 
     public static void main(String[] args) {
-//        Num x = new Num(999);
-          Num y = new Num("1000");
-//        Num z = Num.add(x, y);
+          Num s = new Num(-999);
+          Num x = new Num("-5236");
+          Num y = new Num("5236");
+
+          Num z = Num.add(x, y);
 //        System.out.println(z);
 //        Num a = Num.power(x, 8);
 //        System.out.println(a);
-          if(y != null) y.printList();
+          if(x != null) x.printList();
     }
 
 
