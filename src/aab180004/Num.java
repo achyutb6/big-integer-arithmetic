@@ -30,7 +30,7 @@ public class Num  implements Comparable<Num> {
         }
         arr = new long[len];
         for(j=len-1;j>=0;j--,i++){
-            arr[j] = Character.getNumericValue(s.charAt(i));
+            arr[j] = Character.digit(s.charAt(i),10);
         }
     }
     public Num(){
@@ -121,6 +121,36 @@ public class Num  implements Comparable<Num> {
     // Utility functions
     // compare "this" to "other": return +1 if this is greater, 0 if equal, -1 otherwise
     public int compareTo(Num other) {
+        if(!this.isNegative && !other.isNegative)
+            return compareLength(other);
+        else if(this.isNegative && other.isNegative)
+            return -1*compareLength(other);
+        else if (this.isNegative && !other.isNegative)
+            return -1;
+        else
+            return 1;
+    }
+
+
+    public int compareLength(Num other) {
+        if (this.len<other.len) {
+            return -1;
+        } else if (this.len>other.len) {
+            return +1;
+        } else {
+            return compareMagnitude(other);
+        }
+    }
+
+
+    public int compareMagnitude(Num other) {
+        for (int i = this.len - 1; i >= 0; i--) {
+            if (this.arr[i] < other.arr[i]) {
+                return -1;
+            } else if (this.arr[i] > other.arr[i]) {
+                return 1;
+            }
+        }
         return 0;
     }
 
@@ -175,7 +205,10 @@ public class Num  implements Comparable<Num> {
 
 
     public static void main(String[] args) {
-          Num s = new Num(-999);
+          Num s = new Num("0");
+          Num t = new Num("0");
+
+          System.out.println(s.compareTo(t));
           Num x = new Num("-5236");
           Num y = new Num("5236");
 
@@ -183,7 +216,7 @@ public class Num  implements Comparable<Num> {
 //        System.out.println(z);
 //        Num a = Num.power(x, 8);
 //        System.out.println(a);
-          if(x != null) x.printList();
+         // if(x != null) x.printList();
     }
 
 
