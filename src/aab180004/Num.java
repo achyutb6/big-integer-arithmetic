@@ -85,21 +85,99 @@ public class Num  implements Comparable<Num> {
         }
         if(carry>0)
             out.arr[i] = carry;
-
+        out.len =i;
         return out;
     }
 
     public static Num subtract(Num a, Num b) {
-        return null;
+        long carry = 0;
+        long sub =0;
+        Num diff = new Num();
+        Num x =a ,y =b;
+        if(a.compareTo(b)<0)
+        {
+            x = b;
+            y = a;
+            diff.isNegative = true;
+        }
+        for(int i=0; i<y.len; i++)
+        {
+            sub = x.arr[i] - y.arr[i] - carry;
+            if(sub < 0){
+                sub += 10;
+                carry += 1;
+            }
+            else{
+                carry = 0;
+            }
+            diff.arr[i] = sub;
+            diff.len++;
+        }
+        for(int j=y.len; j<x.len; j++)
+        {
+            sub = x.arr[j] - carry;
+            if(sub < 0){
+                sub += 10;
+                carry += 1;
+            }
+            else{
+                carry = 0;
+            }
+            if(sub !=0) {
+                diff.arr[j] = sub;
+                diff.len++;
+            }
+        }
+        return diff;
     }
 
+    /*public static Num subtract(Num a, Num b) {
+        Num diff = new Num();
+        Num x =a ,y =b;
+        if(a.compareTo(b)<0)
+        {
+            x = b;
+            y= a;
+            diff.isNegative = true;
+        }
+        for(int i=0 ; i<y.len ;i++){
+            y.arr[i] = 9 - y.arr[i];
+        }
+        diff = add(x,y);
+
+        return diff;
+    }*/
+
     public static Num product(Num a, Num b) {
-        return null;
+        Num product = new Num();
+        long carry;
+        for(int i=0; i<b.len ; i++){
+            carry=0;
+            for(int j=0; j<a.len ; j++){
+                product.arr[i+j] += carry + a.arr[j] * b.arr[i];
+                carry = product.arr[i+j] / a.base;
+                product.arr[i+j] = product.arr[i+j] % a.base;
+                product.len++;
+            }
+            product.arr[i + a.len] = carry;
+        }
+
+        if(a.isNegative ^ b.isNegative)
+            product.isNegative = true;
+        else
+            product.isNegative = false;
+
+        return product;
     }
 
     // Use divide and conquer
     public static Num power(Num a, long n) {
-        return null;
+        if( n == 0)
+            return new Num(1);
+        else if(n % 2 == 0 )
+            return product(power(a,n/2),power (a,n/2));
+        else
+            return product(a,product(power(a,n/2),power (a,n/2)));
     }
 
     // Use binary search to calculate a/b
@@ -170,7 +248,10 @@ public class Num  implements Comparable<Num> {
 
     // Return number to a string in base 10
     public String toString() {
-        return null;
+        StringBuilder output = new StringBuilder();
+        for(int i=len-1; i>=0; i--)
+            output.append(arr[i]);
+        return String.valueOf(output);
     }
 
     public long base() { return base; }
@@ -205,14 +286,21 @@ public class Num  implements Comparable<Num> {
 
 
     public static void main(String[] args) {
-          Num s = new Num("0");
-          Num t = new Num("0");
+          Num s = new Num("50");
+          Num t = new Num("10");
 
-          System.out.println(s.compareTo(t));
-          Num x = new Num("-5236");
-          Num y = new Num("5236");
+          Num u =Num.product(s,t);
+          System.out.println((u.isNegative?"-":"")+u);
 
-          Num z = Num.add(x, y);
+          Num v =Num.power(t,3);
+          System.out.println((v.isNegative?"-":"")+v);
+
+
+          //System.out.println(s.compareTo(t));
+          //Num x = new Num("-5236");
+          //Num y = new Num("5236");
+
+          //Num z = Num.add(x, y);
 //        System.out.println(z);
 //        Num a = Num.power(x, 8);
 //        System.out.println(a);
