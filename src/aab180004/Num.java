@@ -38,6 +38,11 @@ public class Num  implements Comparable<Num> {
         arr = new long[100000];
     }
 
+    public Num(long arr[]){
+        this.arr = arr;
+        this.len = arr.length;
+    }
+
     public Num(long x) {
         this();
         int i = 0;
@@ -60,46 +65,51 @@ public class Num  implements Comparable<Num> {
     }
 
     public static Num add(Num a, Num b) {
-        Num out = new Num();
+        long[] out = new long[Math.max(a.len,b.len)+1];
         long sum =0;
         long carry =0;
         int i=0;
         while(i<a.len && i<b.len)
         {
             sum = a.arr[i] + b.arr[i] + carry;
-            out.arr[i] =sum % a.base;
+            out[i] =sum % a.base;
             carry = sum /a.base;
             i++;
         }
         while(i<a.len)
         {
             sum = a.arr[i] + carry;
-            out.arr[i] = sum % a.base;
+            out[i] = sum % a.base;
             i++;
         }
         while(i<b.len)
         {
             sum = b.arr[i] + carry;
-            out.arr[i] = sum % b.base;
+            out[i] = sum % b.base;
             i++;
         }
         if(carry>0)
-            out.arr[i] = carry;
-        out.len =i;
-        return out;
+            out[i] = carry;
+
+        return new Num(out[out.length-1]==0?Arrays.copyOfRange(out,0,out.length-1):out);
     }
 
     public static Num subtract(Num a, Num b) {
         long carry = 0;
         long sub =0;
-        Num diff = new Num();
+        Num zero = new Num(0);
+        long[] diff = new long[Math.max(a.len,b.len)];
         Num x =a ,y =b;
         if(a.compareTo(b)<0)
         {
             x = b;
             y = a;
-            diff.isNegative = true;
         }
+        if(x.compareTo(zero) ==0)
+            return y;
+        if(y.compareTo(zero)==0)
+            return x;
+
         for(int i=0; i<y.len; i++)
         {
             sub = x.arr[i] - y.arr[i] - carry;
@@ -110,8 +120,7 @@ public class Num  implements Comparable<Num> {
             else{
                 carry = 0;
             }
-            diff.arr[i] = sub;
-            diff.len++;
+            diff[i] = sub;
         }
         for(int j=y.len; j<x.len; j++)
         {
@@ -124,11 +133,21 @@ public class Num  implements Comparable<Num> {
                 carry = 0;
             }
             if(sub !=0) {
-                diff.arr[j] = sub;
-                diff.len++;
+                diff[j] = sub;
             }
         }
-        return diff;
+        int k = diff.length-1;
+        while(k>=0 && diff[k] == 0)
+            k--;
+        if(k == -1)
+            return new Num(0);
+
+        Num output = new Num(Arrays.copyOfRange(diff,0,k));
+        if(a.compareTo(b)<0)
+        {
+            output.isNegative = true;
+        }
+        return output;
     }
 
     /*public static Num subtract(Num a, Num b) {
@@ -149,25 +168,32 @@ public class Num  implements Comparable<Num> {
     }*/
 
     public static Num product(Num a, Num b) {
-        Num product = new Num();
+        long[] product = new long[a.len+b.len];
+        Num zero = new Num(0);
+        if(a.compareTo(zero)==0 || b.compareTo(zero)==0)
+            return zero;
         long carry;
         for(int i=0; i<b.len ; i++){
             carry=0;
             for(int j=0; j<a.len ; j++){
-                product.arr[i+j] += carry + a.arr[j] * b.arr[i];
-                carry = product.arr[i+j] / a.base;
-                product.arr[i+j] = product.arr[i+j] % a.base;
-                product.len++;
+                product[i+j] += carry + a.arr[j] * b.arr[i];
+                carry = product[i+j] / a.base;
+                product[i+j] = product[i+j] % a.base;
             }
-            product.arr[i + a.len] = carry;
+            product[i + a.len] = carry;
         }
+        Num output;
+        if(product[product.length-1]==0)
+            output = new Num(Arrays.copyOfRange(product,0,product.length-1));
+        else
+            output = new Num(product);
 
         if(a.isNegative ^ b.isNegative)
-            product.isNegative = true;
+            output.isNegative = true;
         else
-            product.isNegative = false;
+            output.isNegative = false;
 
-        return product;
+        return output;
     }
 
     // Use divide and conquer
@@ -182,7 +208,19 @@ public class Num  implements Comparable<Num> {
 
     // Use binary search to calculate a/b
     public static Num divide(Num a, Num b) {
-        return null;
+        Num left = new Num(0);
+        Num right = new Num (a.arr);
+
+        while(true){
+            Num mid = add(left,(subtract(right,left)).by2());
+
+            if(product(b,mid).compareTo(a) == 0)
+                return mid;
+            if(product(b,mid).compareTo(a) < 0)
+                left = mid;
+            else
+                right = mid;
+        }
     }
 
     // return a%b
@@ -192,7 +230,18 @@ public class Num  implements Comparable<Num> {
 
     // Use binary search
     public static Num squareRoot(Num a) {
-        return null;
+        Num one = new Num(1);
+        Num zero = new Num (0);
+        if (a.compareTo(zero) ==0 || a.compareTo(one) ==0 )
+            return a;
+        Num result = new Num();
+        Num i = new Num(1);
+
+        while(result.compareTo(a) <=0){
+            i = add(i,one);
+            result = product(i,i);
+        }
+        return subtract(i,one);
     }
 
 
@@ -267,7 +316,18 @@ public class Num  implements Comparable<Num> {
 
     // Divide by 2, for using in binary search
     public Num by2() {
-        return null;
+        long[] output = this.arr;
+        long carry = 0;
+        for(int i=len-1; i>=0 ; i-- ){
+            output[i] = output[i] + carry;
+            if(output[i] % 2 == 1)
+                carry = 10;
+            else
+                carry = 0;
+            output[i] = this.arr[i] / 2;
+        }
+
+        return new Num(output[output.length-1]==0?Arrays.copyOfRange(output,0,output.length-1):output);
     }
 
     // Evaluate an expression in postfix and return resulting number
@@ -286,14 +346,22 @@ public class Num  implements Comparable<Num> {
 
 
     public static void main(String[] args) {
-          Num s = new Num("50");
-          Num t = new Num("10");
+          Num s = new Num("9999");
+          Num t = new Num("999");
 
-          Num u =Num.product(s,t);
-          System.out.println((u.isNegative?"-":"")+u);
+            System.out.println(product(s,t));
 
-          Num v =Num.power(t,3);
-          System.out.println((v.isNegative?"-":"")+v);
+//          Num p = Num.add(s,t);
+//          System.out.println((p.isNegative?"-":"")+p);
+//
+//          Num u =Num.product(s,t);
+//          System.out.println((u.isNegative?"-":"")+u);
+//
+//          Num v =Num.power(s,3);
+//          System.out.println((v.isNegative?"-":"")+v);
+//
+//          Num w = Num.squareRoot(s);
+//          System.out.println((w.isNegative?"-":"")+w);
 
 
           //System.out.println(s.compareTo(t));
