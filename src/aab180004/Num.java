@@ -80,12 +80,14 @@ public class Num  implements Comparable<Num> {
         {
             sum = a.arr[i] + carry;
             out[i] = sum % a.base;
+            carry = sum / a.base;
             i++;
         }
         while(i<b.len)
         {
             sum = b.arr[i] + carry;
             out[i] = sum % b.base;
+            carry = sum / a.base;
             i++;
         }
         if(carry>0)
@@ -96,7 +98,6 @@ public class Num  implements Comparable<Num> {
 
     public static Num subtract(Num a, Num b) {
         long carry = 0;
-        long sub =0;
         Num zero = new Num(0);
         long[] diff = new long[Math.max(a.len,b.len)];
         Num x =a ,y =b;
@@ -112,10 +113,10 @@ public class Num  implements Comparable<Num> {
 
         for(int i=0; i<y.len; i++)
         {
-            sub = x.arr[i] - y.arr[i] - carry;
+            long sub = x.arr[i] - y.arr[i] - carry;
             if(sub < 0){
                 sub += 10;
-                carry += 1;
+                carry = 1;
             }
             else{
                 carry = 0;
@@ -124,25 +125,27 @@ public class Num  implements Comparable<Num> {
         }
         for(int j=y.len; j<x.len; j++)
         {
-            sub = x.arr[j] - carry;
+            long sub = x.arr[j] - carry;
             if(sub < 0){
                 sub += 10;
-                carry += 1;
+                carry = 1;
             }
             else{
                 carry = 0;
             }
-            if(sub !=0) {
+//            if(sub !=0) {
                 diff[j] = sub;
-            }
+//            }
         }
         int k = diff.length-1;
         while(k>=0 && diff[k] == 0)
             k--;
         if(k == -1)
             return new Num(0);
+        if(k == 0)
+            return  new Num(diff[0]);
 
-        Num output = new Num(Arrays.copyOfRange(diff,0,k));
+        Num output = new Num(Arrays.copyOfRange(diff,0,k+1));
         if(a.compareTo(b)<0)
         {
             output.isNegative = true;
@@ -209,17 +212,22 @@ public class Num  implements Comparable<Num> {
     // Use binary search to calculate a/b
     public static Num divide(Num a, Num b) {
         Num left = new Num(0);
-        Num right = new Num (a.arr);
+        Num right = new Num (Arrays.copyOf(a.arr,a.len));
+        Num prevMid = new Num (0);
+
+        Num temp1,temp2;
 
         while(true){
-            Num mid = add(left,(subtract(right,left)).by2());
-
-            if(product(b,mid).compareTo(a) == 0)
+            temp1 = subtract(right,left);
+            temp2 = temp1.by2();
+            Num mid = add(left,temp2);
+            if(product(b,mid).compareTo(a) == 0 || prevMid.compareTo(mid)==0)
                 return mid;
             if(product(b,mid).compareTo(a) < 0)
                 left = mid;
             else
                 right = mid;
+            prevMid =mid;
         }
     }
 
@@ -316,7 +324,11 @@ public class Num  implements Comparable<Num> {
 
     // Divide by 2, for using in binary search
     public Num by2() {
-        long[] output = this.arr;
+        Num zero = new Num(0);
+        Num one = new Num(1);
+        if(this.compareTo(one)==0 || this.compareTo(zero) == 0)
+            return zero;
+        long[] output = Arrays.copyOf(this.arr,this.len);
         long carry = 0;
         for(int i=len-1; i>=0 ; i-- ){
             output[i] = output[i] + carry;
@@ -324,10 +336,17 @@ public class Num  implements Comparable<Num> {
                 carry = 10;
             else
                 carry = 0;
-            output[i] = this.arr[i] / 2;
+            output[i] = output[i] / 2;
         }
+        Num by2;
+        if(output[output.length-1]==0) {
+            by2 = new Num(Arrays.copyOfRange(output, 0, output.length - 1));
+        }
+        else
+            by2 = new Num(output);
 
-        return new Num(output[output.length-1]==0?Arrays.copyOfRange(output,0,output.length-1):output);
+        //return new Num(output[output.length-1]==0?Arrays.copyOfRange(output,0,output.length-1):output);
+        return  by2;
     }
 
     // Evaluate an expression in postfix and return resulting number
@@ -346,11 +365,13 @@ public class Num  implements Comparable<Num> {
 
 
     public static void main(String[] args) {
-          Num s = new Num("9999");
-          Num t = new Num("999");
+          Num s = new Num("10");
+          Num t = new Num("11");
 
-            System.out.println(product(s,t));
 
+        System.out.println(divide(s,t));
+//            for(int i=0;i<10;i++)
+//                System.out.println(s=s.by2());
 //          Num p = Num.add(s,t);
 //          System.out.println((p.isNegative?"-":"")+p);
 //
