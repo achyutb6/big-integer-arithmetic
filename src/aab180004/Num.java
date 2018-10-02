@@ -233,23 +233,51 @@ public class Num  implements Comparable<Num> {
 
     // return a%b
     public static Num mod(Num a, Num b) {
-        return null;
+        Num ZERO = new Num(0);
+        Num ONE = new Num(1);
+        if(b.compareTo(ZERO) ==0)
+            return null;
+        if(a.compareTo(b) == 0 )
+            return ZERO;
+        if(b.compareTo(ONE) == 0)
+            return ZERO;
+
+        Num temp1 = divide(a,b);
+        Num temp2 = product(b,temp1);
+        Num temp3 = subtract(a,temp2);
+
+        return (temp3);
     }
 
     // Use binary search
     public static Num squareRoot(Num a) {
-        Num one = new Num(1);
-        Num zero = new Num (0);
-        if (a.compareTo(zero) ==0 || a.compareTo(one) ==0 )
+        Num ZERO = new Num(0);
+        Num ONE = new Num(1);
+        if(a.compareTo(ZERO)==0 || a.compareTo(ONE)==0)
             return a;
-        Num result = new Num();
-        Num i = new Num(1);
 
-        while(result.compareTo(a) <=0){
-            i = add(i,one);
-            result = product(i,i);
+        Num start = ONE;
+        Num end = a;
+        Num result = ZERO;
+        Num prevMid = ZERO;
+
+        while(start.compareTo(end) <=0){
+            Num mid = (add(start,end)).by2();
+
+            Num prod = product(mid,mid);
+            if(prod.compareTo(a)== 0 || prevMid.compareTo(mid) == 0 )
+                return  mid;
+
+            if(prod.compareTo(a)<0){
+                start = add(mid,ONE);
+                result = mid;
+            }
+            else{
+                end = mid;
+            }
+            prevMid = mid;
         }
-        return subtract(i,one);
+        return result;
     }
 
 
@@ -257,9 +285,9 @@ public class Num  implements Comparable<Num> {
     // compare "this" to "other": return +1 if this is greater, 0 if equal, -1 otherwise
     public int compareTo(Num other) {
         if(!this.isNegative && !other.isNegative)
-            return compareLength(other);
+            return unsignedCompareTo(other);
         else if(this.isNegative && other.isNegative)
-            return -1*compareLength(other);
+            return -1*unsignedCompareTo(other);
         else if (this.isNegative && !other.isNegative)
             return -1;
         else
@@ -267,7 +295,7 @@ public class Num  implements Comparable<Num> {
     }
 
 
-    public int compareLength(Num other) {
+    public int unsignedCompareTo(Num other) {
         if (this.len<other.len) {
             return -1;
         } else if (this.len>other.len) {
@@ -324,10 +352,10 @@ public class Num  implements Comparable<Num> {
 
     // Divide by 2, for using in binary search
     public Num by2() {
-        Num zero = new Num(0);
+        Num ZERO = new Num(0);
         Num one = new Num(1);
-        if(this.compareTo(one)==0 || this.compareTo(zero) == 0)
-            return zero;
+        if(this.compareTo(one)==0 || this.compareTo(ZERO) == 0)
+            return ZERO;
         long[] output = Arrays.copyOf(this.arr,this.len);
         long carry = 0;
         for(int i=len-1; i>=0 ; i-- ){
@@ -365,11 +393,11 @@ public class Num  implements Comparable<Num> {
 
 
     public static void main(String[] args) {
-          Num s = new Num("10");
-          Num t = new Num("11");
+          Num s = new Num("100");
+          Num t = new Num("3");
 
 
-        System.out.println(divide(s,t));
+        System.out.println(mod(s,t));
 //            for(int i=0;i<10;i++)
 //                System.out.println(s=s.by2());
 //          Num p = Num.add(s,t);
