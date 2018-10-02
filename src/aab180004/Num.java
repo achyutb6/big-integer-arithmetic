@@ -3,6 +3,7 @@ package aab180004;
 // Starter code for lp1.
 // Version 1.0 (8:00 PM, Wed, Sep 5).
 
+import java.math.BigInteger;
 import java.util.Arrays;
 import java.util.Iterator;
 import java.util.PrimitiveIterator;
@@ -32,6 +33,7 @@ public class Num  implements Comparable<Num> {
         for(j=len-1;j>=0;j--,i++){
             arr[j] = Character.digit(s.charAt(i),10);
         }
+
     }
     public Num(){
         len = 0;
@@ -115,7 +117,7 @@ public class Num  implements Comparable<Num> {
         {
             long sub = x.arr[i] - y.arr[i] - carry;
             if(sub < 0){
-                sub += 10;
+                sub += x.base; //change base
                 carry = 1;
             }
             else{
@@ -127,7 +129,7 @@ public class Num  implements Comparable<Num> {
         {
             long sub = x.arr[j] - carry;
             if(sub < 0){
-                sub += 10;
+                sub += x.base; //change base
                 carry = 1;
             }
             else{
@@ -343,11 +345,42 @@ public class Num  implements Comparable<Num> {
 
     // Return number equal to "this" number, in base=newBase
     public Num convertBase(int newBase) {
+        Num ZERO = new Num(0);
+        Num thisNum = new Num(this.arr);
+        Num b = new Num(Integer.toString(newBase));
         int arrSize = 0;
-        Num newNum = new Num("");
         arrSize = (int) Math.ceil((len+1)/Math.log10(base)+1);
-        newNum.arr = new long[arrSize];
-        return null;
+        long[] newNum = new long[arrSize];
+        int i =0;
+        while(thisNum.compareTo(ZERO) > 0){
+            newNum[i] = Long.parseLong(mod(thisNum,b).toString());
+            thisNum = divide(thisNum,b);
+            i++;
+        }
+        int k = newNum.length-1;
+        while(k>=0 && newNum[k] == 0)
+            k--;
+        if(k == -1)
+            return new Num(0);
+        if(k == 0)
+            return  new Num(newNum[0]);
+
+        Num result = new Num(Arrays.copyOfRange(newNum,0,k+1));
+        result.base = newBase;
+        return result;
+    }
+
+    public void removeTrailingZeros() {
+        int new_len = 0;
+        for (int i = len-1; i > 0; i--) {
+            if (this.arr[i] != 0) {
+                new_len = i;
+                break;
+            }
+        }
+        len = new_len;
+        if (len == 0 && this.arr[0] == 0)
+            this.isNegative = false;
     }
 
     // Divide by 2, for using in binary search
@@ -361,7 +394,7 @@ public class Num  implements Comparable<Num> {
         for(int i=len-1; i>=0 ; i-- ){
             output[i] = output[i] + carry;
             if(output[i] % 2 == 1)
-                carry = 10;
+                carry = base; //change base
             else
                 carry = 0;
             output[i] = output[i] / 2;
@@ -393,11 +426,14 @@ public class Num  implements Comparable<Num> {
 
 
     public static void main(String[] args) {
-          Num s = new Num("100");
-          Num t = new Num("3");
+          Num s = new Num("214748364888888888888888888888");
+          Num t = new Num(100);
 
+        //BigInteger number = new BigInteger("214748364888888888888888888888",10);
+        //System.out.println(number.toString(555));
 
-        System.out.println(mod(s,t));
+        System.out.println(s =s.convertBase(16));
+        s.printList();
 //            for(int i=0;i<10;i++)
 //                System.out.println(s=s.by2());
 //          Num p = Num.add(s,t);
