@@ -4,6 +4,7 @@ package aab180004;
 // Version 1.0 (8:00 PM, Wed, Sep 5).
 
 import java.math.BigInteger;
+import java.util.ArrayDeque;
 import java.util.Arrays;
 import java.util.Iterator;
 import java.util.PrimitiveIterator;
@@ -370,18 +371,20 @@ public class Num  implements Comparable<Num> {
         return result;
     }
 
-    public void removeTrailingZeros() {
-        int new_len = 0;
-        for (int i = len-1; i > 0; i--) {
-            if (this.arr[i] != 0) {
-                new_len = i;
-                break;
-            }
+/*    public Num convertBase(int newBase) {
+        Num ZERO = new Num(0);
+        Num thisNum = new Num(this.arr);
+        Num b = new Num(Integer.toString(newBase));
+        int arrSize = 0;
+        arrSize = (int) Math.ceil((len+1)/Math.log10(base)+1);
+        Num newNum = ZERO;
+        for(int i=0 ; i< len ; i++){
+            long temp =(long)(thisNum.arr[i] * Math.pow(newBase, i));
+            newNum = add(newNum,new Num(temp));
         }
-        len = new_len;
-        if (len == 0 && this.arr[0] == 0)
-            this.isNegative = false;
-    }
+        return newNum;
+    }*/
+
 
     // Divide by 2, for using in binary search
     public Num by2() {
@@ -414,25 +417,133 @@ public class Num  implements Comparable<Num> {
     // Each string is one of: "*", "+", "-", "/", "%", "^", "0", or
     // a number: [1-9][0-9]*.  There is no unary minus operator.
     public static Num evaluatePostfix(String[] expr) {
-        return null;
+        ArrayDeque<Num> stack = new ArrayDeque<>();
+
+        for(int i=0 ; i<expr.length ; i++){
+            if(Character.isDigit(expr[i].charAt(0))){
+                stack.push(new Num(expr[i]));
+            }
+            else{
+                Num val1 = stack.pop();
+                Num val2 = stack.pop();
+
+                switch(expr[i]){
+                    case "+":
+                        stack.push(add(val2,val1));
+                        break;
+
+                    case "-":
+                        stack.push(subtract(val2,val1));
+                        break;
+
+                    case "/":
+                        stack.push(divide(val2,val1));
+                        break;
+
+                    case "*":
+                        stack.push(product(val2,val1));
+                        break;
+
+                    case "%":
+                        stack.push(mod(val2,val1));
+                        break;
+
+                    case "^":
+                        stack.push(power(val2,Long.parseLong(val1.toString())));
+                        break;
+
+                }
+
+            }
+
+        }
+
+        return stack.pop();
     }
 
     // Evaluate an expression in infix and return resulting number
     // Each string is one of: "*", "+", "-", "/", "%", "^", "(", ")", "0", or
     // a number: [1-9][0-9]*.  There is no unary minus operator.
     public static Num evaluateInfix(String[] expr) {
-        return null;
+
+        ArrayDeque<Num> values = new ArrayDeque<>();
+        ArrayDeque<String> operators = new ArrayDeque<>();
+
+        for(int i=0 ; i<expr.length; i++){
+            if(Character.isDigit(expr[i].charAt(0))){
+                values.push(new Num(expr[i]));
+            }
+            else if(expr[i].equals("(")){
+                operators.push(expr[i]);
+            }
+            else if(expr[i].equals(")")){
+                while(!operators.peek().equals("(")){
+                    values.push(evaluate(operators.pop(),values.pop(),values.pop()));
+                }
+                operators.pop();
+            }else{
+                while(!operators.isEmpty() && hasPrecedence(expr[i],operators.peek())){
+                    values.push(evaluate(operators.pop(),values.pop(),values.pop()));
+                }
+                operators.push(expr[i]);
+            }
+        }
+
+        while (!operators.isEmpty()){
+            values.push(evaluate(operators.pop(),values.pop(),values.pop()));
+        }
+
+        return values.pop();
     }
 
+    public static boolean hasPrecedence(String operator1, String operator2){
+        if(operator2.equals("(") || operator2.equals(")")){
+            return false;
+        }
+        if((operator1.equals("*") || operator1.equals("/")) && (operator2.equals("+") || operator2.equals("-"))){
+            return false;
+        }else{
+            return true;
+        }
+    }
+
+    public static Num evaluate(String operator,Num a,Num b){
+        switch(operator){
+            case "+":
+                return add(b,a);
+
+            case "-":
+                return (subtract(b,a));
+
+            case "/":
+                return  (divide(b,a));
+
+            case "*":
+                return  (product(b,a));
+
+            case "%":
+                return (mod(b,a));
+
+            case "^":
+                return  (power(b,Long.parseLong(a.toString())));
+
+        }
+        return new Num(0);
+    }
 
     public static void main(String[] args) {
-          Num s = new Num("214748364888888888888888888888");
+          Num s = new Num("8");
           Num t = new Num(100);
+
+          String[] input = {"10","+","2","*","6"};
+
+          Num p = evaluateInfix(input);
+          System.out.println((p.isNegative?"-":"")+p);
 
         //BigInteger number = new BigInteger("214748364888888888888888888888",10);
         //System.out.println(number.toString(555));
 
-        System.out.println(s =s.convertBase(16));
+        System.out.println(s =s.convertBase(3));
         s.printList();
 //            for(int i=0;i<10;i++)
 //                System.out.println(s=s.by2());
