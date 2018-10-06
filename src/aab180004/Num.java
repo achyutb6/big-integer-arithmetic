@@ -4,7 +4,7 @@ package aab180004;
  * Num class which stores and performs arithmetic operations on arbitrarily large integers
  * @author Achyut Arun Bhandiwad
  * @author Nirbhay Sibal
- * @author Vineet Vats
+ * @author Vineet Vats (vxv180008)
  * @version 1.80
  * @since 1.0
  */
