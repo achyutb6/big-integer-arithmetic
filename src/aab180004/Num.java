@@ -1,7 +1,6 @@
 package aab180004;
 
-// Starter code for lp1.
-// Version 1.0 (8:00 PM, Wed, Sep 5).
+
 
 import java.math.BigInteger;
 import java.util.ArrayDeque;
@@ -296,7 +295,7 @@ public class Num  implements Comparable<Num> {
                 result = mid;
             }
             else{
-                end = mid;
+                end = subtract(mid,ONE);
             }
             prevMid = mid;
         }
@@ -399,7 +398,7 @@ public class Num  implements Comparable<Num> {
             thisNum = divide(thisNum,b);
             i++;
         }
-        int k = arrSize -1;
+        int k = newNum.length -1;
         while(k>=0 && newNum[k] == 0)
             k--;
         if(k == -1)
@@ -583,19 +582,22 @@ public class Num  implements Comparable<Num> {
     }
 
     public static void main(String[] args) {
-        Num s = new Num("100");
-        Num t = new Num(100);
+        Num s = new Num("1000000000000000000000");
+        Num t = new Num(11);
 
-        String[] input = {"10","+","2","*","6"};
+        //String[] input = {"10","+","2","*","6"};
+        String[] input = { "98765432109876543210987654321",  "5432109876543210987654321", "345678901234567890123456789012", "*", "+", "246801357924680135792468013579", "*", "12345678910111213141516171819202122", "191817161514131211109876543210", "13579", "24680", "*", "-", "*", "+", "7896543", "*", "157984320", "+" };
 
-        Num p = evaluateInfix(input);
+        Num p = evaluatePostfix(input);
         System.out.println((p.isNegative?"-":"")+p);
+        System.out.println(squareRoot(p));
+        (p.convertBase(1000)).printList();
 
         //BigInteger number = new BigInteger("214748364888888888888888888888",10);
         //System.out.println(number.toString(555));
 
-        System.out.println(s);
-        s.printList();
+//        System.out.println(s);
+//        s.printList();
 //            for(int i=0;i<10;i++)
 //                System.out.println(s=s.by2());
 //          Num p = Num.add(s,t);
