@@ -2,9 +2,9 @@ package aab180004;
 
 /**
  * Num class which stores and performs arithmetic operations on arbitrarily large integers
- * @author Achyut Arun Bhandiwad
- * @author Nirbhay Sibal
- * @author Vineet Vats
+ * @author Achyut Arun Bhandiwad - AAB180004
+ * @author Nirbhay Sibal - NXS180002
+ * @author Vineet Vats - VXV180008
  * @version 1.80
  * @since 1.0
  */
@@ -708,6 +708,5 @@ public class Num  implements Comparable<Num> {
         (p.convertBase(1000)).printList();
 
     }
-
 
 }
